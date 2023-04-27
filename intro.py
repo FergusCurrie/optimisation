@@ -8,7 +8,7 @@ from jax import random, hessian
 import cvxpy
 import matplotlib.pyplot as plt
 from test_problem import get_test_function
-
+import scipy 
 """
 Object for tracking experiment. 
 Easy switch between functions (variable limits )
@@ -22,14 +22,11 @@ def hessian(fun):
 
 
 class OptimisationExperiment:
-    def __init__(self, method, experiment_name, save_name, x_bounds, y_bounds) -> None:
-        func, contour = get_test_function(experiment_name)
-        self.func = func
-        self.contour = contour
-        self.save_name = save_name
-        self.x_bounds = x_bounds
-        self.y_bounds = y_bounds
+    def __init__(self, method, problem, search_method='btl') -> None:
+        self.func, self.contour, self.start_point, self.x_bounds, self.y_bounds = get_test_function(problem)
         self.method = method
+        self.search_method = search_method
+        self.problem = problem
 
     def graph_function(self, ax):
         y = np.linspace(self.y_bounds[0], self.y_bounds[1], 500)
@@ -63,8 +60,8 @@ class OptimisationExperiment:
             x_history.append(x.copy())
         return x_history
 
-    def line_search(self, x, step):
-        t = np.linspace(0.0001, 10, 100)
+    def exact_line_search(self, x, step):
+        t = np.linspace(0.0001, 100, 100)
         x_ = x + np.outer(t, step)
         assert np.shape(x_) == (100, 2)
         tmin = t[np.argmin(np.array([self.func(q) for q in x_]))]
@@ -92,9 +89,10 @@ class OptimisationExperiment:
         for i in range(40):
             x_curr = x_history[-1]
             search_direction = -1 * g(x_curr)
-            step_size = self.backtracking_line_search(x_curr, search_direction)
-            # print(search_direction)
-            # print(step_size)
+            if self.search_method == 'btl':
+                step_size = self.backtracking_line_search(x_curr, search_direction)
+            if self.search_method == 'els':
+                step_size = self.exact_line_search(x_curr, search_direction)
             x_next = x_curr + step_size * search_direction
             x_history.append(x_next.copy())
             # if np.linalg.norm(search_direction, ord=2) < 0.0001:
@@ -132,7 +130,7 @@ class OptimisationExperiment:
         ax[1].plot(np.arange(len(x_history)), np.array([self.func(q) for q in x_history]), color="red")
         ax[0].set_xlabel("iterations")
         ax[0].set_ylabel("function value")
-        fig.savefig(self.save_name)
+        fig.savefig(f"outputs/{self.method}_{self.search_method}_{self.problem}.png")
 
     def run(self, x_start):
         if self.method == "gradient_descent":
@@ -142,18 +140,15 @@ class OptimisationExperiment:
         self.plot_descent(x_history)
 
 
-# exp = OptExperiment("sphere", "gradient_descent_sphere.png", x_bounds=[-2, 2], y_bounds=[-2, 2])
-# exp.run(np.array([0.0, -1.0]))
+# booth optimal = [1. 3.]? 
+# matyas optimal = [0. 0.]?
+# rosenbrock optimal at [1., 1.]
 
-# exp = OptimisationExperiment("booth", "gradient_descent_booth.png", x_bounds=[-10, 10], y_bounds=[-10, 10])
-# exp.run(np.array([0, 6.5]))
+for problem in ['rosenbrock', 'matyas', 'booth']:
+    for method in ['gradient_descent', 'newton_method']:
+        for search_method in ['btl', 'els']:
+            exp = OptimisationExperiment(method, problem, search_method)
+            exp.run(np.array([0.0, -1.0]))
 
 
-# exp = OptimisationExperiment("rosenbrock", "gradient_descent_rosenbrock.png", x_bounds=[-2, 2], y_bounds=[-1, 3])
-# exp.run(np.array([2.5, -1.5]))
 
-# exp = OptimisationExperiment("newton_method", "matyas", "newton_method_matyas.png", x_bounds=[-10, 10], y_bounds=[-10, 10])
-# exp.run(np.array([-10.0, -8.0]))
-
-exp = OptimisationExperiment("gradient_descent", "booth", "gradient_descent_btl_booth.png", x_bounds=[-10, 10], y_bounds=[-10, 10])
-exp.run(np.array([0, 6.5]))

@@ -1,4 +1,6 @@
 import numpy as np
+from scipy import optimize
+
 
 # can this be written with a bidiagonal matrix?
 # def rosenbrock_function(x):
@@ -48,10 +50,27 @@ def matyas_contour(x, y):
 
 def get_test_function(name):
     if name == "booth":
-        return booth_function, booth_contour
+        return booth_function, booth_contour, np.array([0, 6.5]), [-10,10],[-10,10]
     if name == "sphere":
         return sphere_function, sphere_contour
     if name == "rosenbrock":
-        return rosenbrock_function, rosenbrock_contour
+        return rosenbrock_function, rosenbrock_contour, np.array([2.5, -1.5]), [-2,2],[-4,4]
     if name == "matyas":
-        return matyas_function, matyas_contour
+        return matyas_function, matyas_contour, np.array([-10.0, -8.0]), [-10,10],[-10,10]
+
+
+if __name__ == "__main__":
+    # booth optimal - [1, 3]
+    # rranges = (slice(-10, 10, 0.01), slice(-10, 10, 0.01))
+    # resbrute = optimize.brute(booth_function, rranges)
+    # print(resbrute)
+
+    # rosenbrock optimal at [1, 1]
+    # rranges = (slice(-2, 2, 0.01), slice(-1, 3, 0.01))
+    # resbrute = optimize.brute(rosenbrock_function, rranges)
+    # print(resbrute)
+
+    # matyas optimal - [0, 0]
+    rranges = (slice(-10, 10, 0.01), slice(-10, 10, 0.01))
+    resbrute = optimize.brute(matyas_function, rranges)
+    print(resbrute)
