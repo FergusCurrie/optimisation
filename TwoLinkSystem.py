@@ -7,13 +7,6 @@ https://web.stanford.edu/class/ee364b/lectures/seq_slides.pdf
 
 dot over variable = derivative of variable "dot notation" aka "newtonian notation"
 
-# for scp? 
-self.alpha = 0.1
-self.beta_succ = 1.1
-self.beta_fail = 0.5
-self.rho1 = 0.90
-self.lamb = 2
-
 TODO:
 - add variations from notes
 - gif of the control 
@@ -21,31 +14,6 @@ TODO:
 
 import cvxpy as cvx 
 import numpy as np
-
-
-def psd_hessian(f, x):
-    '''
-    Return PSD part of Hessian 
-    '''
-    pass
-
-def second_order_taylor_expansion(f):
-    pass
-
-def scp(rho=0.90, b_succ=1.1, b_fail=0.5, alpha=0.1):
-    '''
-    scp to solve this will require
-    (1) maintaining estime solution x(k), trust region T(k)
-    (2) convex approximation of f_i
-    (3) affine approximation of h_i
-    (4) x(k+1) is solution to approximate problem formed by (2),(3) + trust region. 
-
-    Trust region is typically just a box, liimited by parameter rho 
-    '''
-    
-    pass
-
-
 
 
 class TwoLinkSystem:
@@ -88,9 +56,10 @@ class TwoLinkSystem:
 
     def J(self):
         h = self.T / self.N # time interval 
-        self.tau[i]
+        # self.tau[i]
         return h 
 
     def run(self):
         
-        for i in range(T):
+        for i in range(self.T):
+            pass
