@@ -8,7 +8,8 @@ from jax import random, hessian
 import cvxpy
 import matplotlib.pyplot as plt
 from test_problem import get_test_function
-import scipy 
+import scipy
+
 """
 Object for tracking experiment. 
 Easy switch between functions (variable limits )
@@ -22,8 +23,14 @@ def hessian(fun):
 
 
 class OptimisationExperiment:
-    def __init__(self, method, problem, search_method='btl') -> None:
-        self.func, self.contour, self.start_point, self.x_bounds, self.y_bounds = get_test_function(problem)
+    def __init__(self, method, problem, search_method="btl") -> None:
+        (
+            self.func,
+            self.contour,
+            self.start_point,
+            self.x_bounds,
+            self.y_bounds,
+        ) = get_test_function(problem)
         self.method = method
         self.search_method = search_method
         self.problem = problem
@@ -34,7 +41,9 @@ class OptimisationExperiment:
         X, Y = np.meshgrid(x, y)
         Z = self.contour(X, Y)
         # LEVELS IS CRITICAL FOR A GOOD GRAPH
-        contour = ax.contourf(X, Y, Z, cmap="viridis", levels=np.linspace(0, 200, 30), extend="max")
+        contour = ax.contourf(
+            X, Y, Z, cmap="viridis", levels=np.linspace(0, 200, 30), extend="max"
+        )
         return contour
 
     def newton_method(self, x_start):
@@ -79,7 +88,9 @@ class OptimisationExperiment:
         rhs = self.func(x) + alpha * t * np.dot(grad(self.func)(x), search_direction)
         while lhs > rhs:
             lhs = self.func(x + t * search_direction)
-            rhs = self.func(x) + alpha * t * np.dot(grad(self.func)(x), search_direction)
+            rhs = self.func(x) + alpha * t * np.dot(
+                grad(self.func)(x), search_direction
+            )
             t = beta * t
         return t
 
@@ -89,9 +100,9 @@ class OptimisationExperiment:
         for i in range(40):
             x_curr = x_history[-1]
             search_direction = -1 * g(x_curr)
-            if self.search_method == 'btl':
+            if self.search_method == "btl":
                 step_size = self.backtracking_line_search(x_curr, search_direction)
-            if self.search_method == 'els':
+            if self.search_method == "els":
                 step_size = self.exact_line_search(x_curr, search_direction)
             x_next = x_curr + step_size * search_direction
             x_history.append(x_next.copy())
@@ -126,8 +137,16 @@ class OptimisationExperiment:
         ax[0].set_title(f"optimal=[{best[0]:.2f},{best[1]:.2f}]")
         cbar = fig.colorbar(contour)
 
-        ax[1].scatter(np.arange(len(x_history)), np.array([self.func(q) for q in x_history]), color="red")
-        ax[1].plot(np.arange(len(x_history)), np.array([self.func(q) for q in x_history]), color="red")
+        ax[1].scatter(
+            np.arange(len(x_history)),
+            np.array([self.func(q) for q in x_history]),
+            color="red",
+        )
+        ax[1].plot(
+            np.arange(len(x_history)),
+            np.array([self.func(q) for q in x_history]),
+            color="red",
+        )
         ax[0].set_xlabel("iterations")
         ax[0].set_ylabel("function value")
         fig.savefig(f"outputs/{self.method}_{self.search_method}_{self.problem}.png")
@@ -140,15 +159,12 @@ class OptimisationExperiment:
         self.plot_descent(x_history)
 
 
-# booth optimal = [1. 3.]? 
+# booth optimal = [1. 3.]?
 # matyas optimal = [0. 0.]?
 # rosenbrock optimal at [1., 1.]
 
-for problem in ['rosenbrock', 'matyas', 'booth']:
-    for method in ['gradient_descent', 'newton_method']:
-        for search_method in ['btl', 'els']:
+for problem in ["rosenbrock", "matyas", "booth"]:
+    for method in ["gradient_descent", "newton_method"]:
+        for search_method in ["btl", "els"]:
             exp = OptimisationExperiment(method, problem, search_method)
             exp.run(np.array([0.0, -1.0]))
-
-
-
